@@ -350,12 +350,8 @@ class OrbitDB {
     databaseTypes[type] = store
   }
 
-  static create () {
-    return new Error('Not implemented yet!')
-  }
-
-  static open () {
-    return new Error('Not implemented yet!')
+  static getDatabaseTypes () {
+    return databaseTypes
   }
 }
 
