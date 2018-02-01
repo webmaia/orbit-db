@@ -7,6 +7,7 @@ const KeyValueStore = require('orbit-db-kvstore')
 const CounterStore = require('orbit-db-counterstore')
 const DocumentStore = require('orbit-db-docstore')
 const Pubsub = require('orbit-db-pubsub')
+const Channel = require('ipfs-pubsub-dc')
 const Cache = require('orbit-db-cache')
 const Keystore = require('orbit-db-keystore')
 const AccessController = require('./ipfs-access-controller')
@@ -152,15 +153,21 @@ class OrbitDB {
   }
 
   // Callback for when a peer connected to a database
-  _onPeerConnected (address, peer, room) {
+  async _onPeerConnected (address, peer, room) {
     logger.debug(`New peer '${peer}' connected to '${address}'`)
     const store = this.stores[address]
     if (store) {
+      // Create a direct channel to the connected peer
+      const c = new Channel(this._ipfs, peer)
+      c.on('error', (err) => logger.error(err))
+      c.on('message', (message) => this._onMessage(address, JSON.parse(message.data)))
       // Send the newly connected peer our latest heads
       let heads = store._oplog.heads
       if (heads.length > 0) {
         logger.debug(`Send latest heads of '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
-        room.sendTo(peer, JSON.stringify(heads))
+        // Wait for the direct channel to be fully connected
+        await c.connect()
+        c.send(JSON.stringify(heads))
       }
       store.events.emit('peer', peer)
     }
