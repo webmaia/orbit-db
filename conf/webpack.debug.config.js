@@ -4,6 +4,7 @@ const path = require('path')
 const Uglify = require('uglifyjs-webpack-plugin')
 
 module.exports = {
+  mode: 'development',
   entry: './src/OrbitDB.js',
   output: {
     libraryTarget: 'var',

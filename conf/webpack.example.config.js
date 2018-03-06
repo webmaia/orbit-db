@@ -12,6 +12,7 @@ const uglifyOptions = {
 }
 
 module.exports = {
+  mode: 'production',
   entry: './examples/browser/browser-webpack-example/index.js',
   output: {
     filename: './examples/browser/browser-webpack-example/bundle.js'
